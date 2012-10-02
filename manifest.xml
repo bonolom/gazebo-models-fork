@@ -1,0 +1,50 @@
+<?xml version="1.0" ?>
+<license>Creative Commons Attribution 3.0 Unported</license>
+
+<models>
+  <model>
+    <name>Camera</name>
+    <uri>/camera</uri>
+  </model>
+
+  <model>
+    <name>Turtle Bot</name>
+    <uri>/turtlebot</uri>
+  </model>
+
+  <model>
+    <name>Willow Garage</name>
+    <uri>/willowgarage</uri>
+  </model>
+
+  <model>
+    <name>Kinect</name>
+    <uri>/kinect</uri>
+  </model>
+
+  <model>
+    <name>Hokuyo</name>
+    <uri>/hokuyo</uri>
+  </model>
+
+  <model>
+    <name>Pioneer2 DX</name>
+    <uri>/pioneer2dx</uri>
+  </model>
+
+  <model>
+    <name>Simple Arm</name>
+    <uri>/simple_arm</uri>
+  </model>
+
+  <model>
+    <name>PR2</name>
+    <uri>/pr2</uri>
+  </model>
+
+  <model>
+    <name>Keuka YouBot</name>
+    <uri>/youbot</uri>
+  </model>
+
+</models>
