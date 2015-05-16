@@ -1,0 +1,461 @@
+<?xml version='1.0'?>
+<%
+  table_height = 0.85
+  table_mass = 50
+  table_com_offset = 1
+
+  field_length = 1.1
+  field_width = 0.73
+  field_height = 0.15
+
+  ground_height = 0.02
+  base_height = 0.544
+
+  goal_width = 0.18
+  goal_height = 0.0019
+  goal_thickness = 0.02
+  goals = {
+    "Red" => {:posX => +1, :rotX => 0},
+    "Blue" => {:posX => -1, :rotX => Math::PI}
+  }
+
+  side_thickness = 0.02
+  sides = {
+    "Red" => {:posX => -1},
+    "Blue" => {:posX => +1}
+  }
+
+  shaft_height = 0.8
+  rod_length = 1.2
+  rod_radius = 0.00779907
+
+  shaft0_dist = 0.508
+  shaft1_dist = 0.3675
+  shaft2_dist = 0.087
+  shaft3_dist = 0.227
+
+  shaft0_limit = 0.18
+  shaft1_limit = 0.23
+  shaft2_limit = 0.07
+  shaft3_limit = 0.18
+
+  player_height = 0.1
+
+  teams = {
+    "Blue" => {:color => "Blue", :sign => +1},
+    "Red" => {:color => "Red", :sign => -1}
+  }
+
+  shafts = {
+    "0" => {:posX => -shaft0_dist, :limitY => shaft0_limit, :center => true,  :side => true,  :mid => false, :sidePosY => 0.15, :midPosY => 0},
+    "1" => {:posX => -shaft1_dist, :limitY => shaft1_limit, :center => false, :side => true,  :mid => false, :sidePosY => 0.1,  :midPosY => 0},
+    "2" => {:posX => -shaft2_dist, :limitY => shaft2_limit, :center => true,  :side => true,  :mid => true,  :sidePosY => 0.13, :midPosY => 0.26},
+    "3" => {:posX => +shaft3_dist, :limitY => shaft3_limit, :center => true,  :side => true,  :mid => false, :sidePosY => 0.15, :midPosY => 0}
+  }
+
+  player_collision = "<geometry> <box> <size>0.045 0.13 0.055</size> </box> </geometry>"
+
+%>
+<sdf version='1.5'>
+  <model name='Foosball'>
+    <static>0</static>
+
+    <!-- table bridge is a dummy link between joints -->
+    <link name="table_bridge">
+      <pose>0 0 <%= table_height/2.0 %> 0 0 0</pose>
+    </link>
+    <!-- /table bridge -->
+
+    <link name='table'>
+      <pose>0 0 <%= table_height/2.0 %> 0 0 0</pose>
+      <inertial>
+        <pose>0 0 <%= - table_com_offset %> 0 0 0</pose>
+        <mass><%= table_mass %></mass>
+  <!--      <inertia>
+          <ixx><%= (table_height*table_height + field_width*field_width)*table_mass/12.0 %></ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy><%= (table_height*table_height + field_length*field_length)*table_mass/12.0 %></iyy>
+          <iyz>0</iyz>
+          <izz><%= (field_length*field_length + field_width*field_width)*table_mass/12.0 %></izz>
+        </inertia>
+   -->   </inertial>
+
+      <visual name='table'>
+        <pose>0 0 0 <%= Math::PI/2.0 %> 0 0</pose>
+        <geometry>
+          <mesh>
+            <uri>model://foosball/meshes/table.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/Orange</name>
+          </script>
+        </material>
+      </visual>
+
+      <!-- table collisions on each player's side -->
+      <%
+        sides.keys.each do |k|
+          posX = sides[k][:posX]
+      %>
+
+        <%= '<collision name=' + '"side' + k + '">' %>
+          <pose>0 <%= posX * (field_width - 0.03 + side_thickness)/2 %> <%= (field_height + base_height)/2 %> 0 0 0</pose>
+          <geometry>
+            <box>
+              <size><%= field_length %> <%= side_thickness %> <%= field_height %></size>
+            </box>
+          </geometry>
+          <surface>
+            <bounce>
+              <restitution_coefficient>0.5</restitution_coefficient>
+              <threshold>0</threshold>
+            </bounce>
+            <contact>
+              <ode>
+                <min_depth>0.0010000</min_depth>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+      <% end %>
+      <!-- /table side collisions -->
+
+      <!-- table collisions on each goal side -->
+      <%
+        goals.keys.each do |k|
+          posX = goals[k][:posX]
+          rotX = goals[k][:rotX]
+      %>
+
+        <%= '<collision name=' + '"goal' + k + '">' %>
+          <pose><%= posX * field_length/2 %> 0 <%= (field_height + base_height)/2 %> <%= rotX %> <%= Math::PI/2.0 %> 0</pose>
+          <geometry>
+            <polyline>
+              <height><%= goal_thickness %></height>
+              <point><%= field_height/2.0 %> <%= -(field_width + 2*side_thickness)/2.0 %></point>
+              <point><%= -field_height/2.0 %> <%= -(field_width + 2*side_thickness)/2.0 %></point>
+              <point><%= -field_height/2.0 %> <%= (field_width + 2*side_thickness)/2.0 %></point>
+              <point><%= field_height/2.0 %> <%= (field_width + 2*side_thickness)/2.0 %></point>
+              <point><%= field_height/2.0 %> <%= goal_width/2.0 %></point>
+              <point><%= -goal_height %> <%= goal_width/2.0 %></point>
+              <point><%= -goal_height %> <%= -goal_width/2.0 %></point>
+              <point><%= field_height/2.0 %> <%= -goal_width/2.0 %></point>
+            </polyline>
+          </geometry>
+          <surface>
+            <bounce>
+              <restitution_coefficient>0.5</restitution_coefficient>
+              <threshold>0</threshold>
+            </bounce>
+            <contact>
+              <ode>
+                <min_depth>0.0010000</min_depth>
+              </ode>
+            </contact>
+          </surface>
+        </collision>
+      <% end %>
+      <!-- /table goal collisions -->
+
+      <!-- table ground -->
+      <visual name='ground'>
+        <pose>0 0 <%= (ground_height + base_height)/2 %> 0 0 0</pose>
+        <geometry>
+          <box>
+            <size><%= field_length %> <%= field_width %> <%= ground_height %></size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://foosball/materials/scripts/</uri>
+            <uri>model://foosball/materials/textures/</uri>
+            <name>Foosball/Field</name>
+          </script>
+        </material>
+      </visual>
+      <collision name='ground'>
+        <pose>0 0 <%= (ground_height + base_height)/2 %> 0 0 0</pose>
+        <geometry>
+          <box>
+            <size><%= field_length %> <%= field_width %> <%= ground_height %></size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <max_vel>0.500</max_vel>
+            </ode>
+          </contact>
+        </surface>
+      </collision>
+      <!-- /table ground -->
+
+    </link>
+
+    <!-- joint fixing the table to the world -->
+    <joint name='table_table_bridge' type='universal'>
+      <parent>table_bridge</parent>
+      <child>table</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-0.05</lower>
+          <upper>0.05</upper>
+        </limit>
+        <dynamics>
+          <damping>1000</damping>
+        </dynamics>
+      </axis>
+      <axis2>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <lower>-0.05</lower>
+          <upper>0.05</upper>
+        </limit>
+        <dynamics>
+          <damping>1000</damping>
+        </dynamics>
+      </axis2>
+      <pose>0 0 0 0 0 0</pose>
+    </joint>
+
+    <joint name='table_bridge_world' type='prismatic'>
+      <parent>world</parent>
+      <child>table_bridge</child>
+      <axis>
+        <xyz>0 0 1</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0.05</upper>
+        </limit>
+      </axis>
+      <pose>0 0 0 0 0 0</pose>
+    </joint>
+    <!-- /table_world joint -->
+
+    <!-- two teams -->
+    <%
+      teams.keys.each do |t|
+        sign = teams[t][:sign]
+        color = teams[t][:color]
+    %>
+      <!-- 4 rods per team -->
+      <%
+        shafts.keys.each do |j|
+          posX        = shafts[j][:posX] * sign
+          limitY      = shafts[j][:limitY]
+          center      = shafts[j][:center]
+          mid         = shafts[j][:mid]
+          side        = shafts[j][:side]
+          sidePosY    = shafts[j][:sidePosY]
+          midPosY     = shafts[j][:midPosY]
+          handlePos   = rod_length / 2.0 * sign
+          handleAngle = -Math::PI
+          if sign == -1 then
+            handleAngle = 0
+          end
+      %>
+
+        <!-- shaft bridge is a dummy link between the revolute and prismatic joints -->
+        <%= '<link name=' + '"shaft' + t + j + '_bridge">' %>
+          <pose><%= posX %> 0 <%= shaft_height %> <%= Math::PI/2.0 %> 0 0</pose>
+        </link>
+        <!-- /shaft bridge -->
+
+        <!-- shaft contains the rod and players -->
+        <%= '<link name=' + '"shaft' + t + j + '">' %>
+          <pose><%= posX %> 0 <%= shaft_height %> <%= Math::PI/2.0 %> 0 0</pose>
+
+          <visual name='rod'>
+            <pose>0 0 0 0 0 0</pose>
+            <geometry>
+              <cylinder>
+                <radius><%= rod_radius %></radius>
+                <length><%= rod_length %></length>
+              </cylinder>
+            </geometry>
+            <material>
+              <script>
+                <uri>file://media/materials/scripts/gazebo.material</uri>
+                <name>Gazebo/Grey</name>
+              </script>
+            </material>
+          </visual>
+
+          <visual name='handle'>
+            <pose>0 0 <%= handlePos %> 0 <%= handleAngle %> 0</pose>
+            <geometry>
+              <mesh>
+                <uri>model://foosball/meshes/handle.dae</uri>
+              </mesh>
+            </geometry>
+            <material>
+              <!-- highlight active rods -->
+              <% if j == "2" || j == "3" %>
+                <script><name><%="Gazebo/" + t%></name></script>
+              <% else %>
+                <script><name>Gazebo/Black</name></script>
+              <% end %>
+            </material>
+          </visual>
+
+          <collision name='rod'>
+            <pose>0 0 0 0 0 0</pose>
+            <geometry>
+              <cylinder>
+                <radius><%= rod_radius %></radius>
+                <length><%= rod_length %></length>
+              </cylinder>
+            </geometry>
+          </collision>
+
+          <!-- center player -->
+          <% if center %>
+
+            <visual name='player_center'>
+              <pose>0 0 0 <%= -Math::PI/2.0 %> 0 0</pose>
+              <geometry>
+                <mesh>
+                  <uri>model://foosball/meshes/player.dae</uri>
+                </mesh>
+              </geometry>
+              <material>
+                <script><name>Gazebo/<%= color%></name></script>
+              </material>
+            </visual>
+
+            <collision name='player_center'>
+              <pose>0 -0.005 0 0 0 0</pose>
+              <%= player_collision %>
+            </collision>
+
+          <% end %>
+          <!-- /center player -->
+
+          <!-- two players between the center player and the side players -->
+          <% if mid %>
+
+            <visual name='player_mid_1'>
+              <pose>0 0 <%= midPosY %> <%= -Math::PI/2.0 %> 0 0</pose>
+              <geometry>
+                <mesh>
+                  <uri>model://foosball/meshes/player.dae</uri>
+                </mesh>
+              </geometry>
+              <material>
+                <script>
+                  <name>Gazebo/<%= color%></name>
+                </script>
+              </material>
+            </visual>
+
+            <collision name='player_mid_1'>
+              <pose>0 -0.005 <%= midPosY %> 0 0 0</pose>
+              <%= player_collision %>
+            </collision>
+
+            <visual name='player_mid_2'>
+              <pose>0 0 <%= -midPosY %> <%= -Math::PI/2.0 %> 0 0</pose>
+              <geometry>
+                <mesh>
+                  <uri>model://foosball/meshes/player.dae</uri>
+                </mesh>
+              </geometry>
+              <material>
+                <script><name>Gazebo/<%= color%></name></script>
+              </material>
+            </visual>
+
+            <collision name='player_mid_2'>
+              <pose>0 -0.005 <%= -midPosY %> 0 0 0</pose>
+              <%= player_collision %>
+            </collision>
+
+          <% end %>
+          <!-- /middle players -->
+
+          <!-- side players: two players in the extremes of the rod -->
+          <% if side %>
+
+            <visual name='player_side_1'>
+              <pose>0 0 <%= sidePosY %> <%= -Math::PI/2.0 %> 0 0</pose>
+              <geometry>
+                <mesh>
+                  <uri>model://foosball/meshes/player.dae</uri>
+                </mesh>
+              </geometry>
+              <material>
+                <script><name>Gazebo/<%= color%></name></script>
+              </material>
+            </visual>
+
+            <collision name='player_side_1'>
+              <pose>0 -0.005 <%= sidePosY %> 0 0 0</pose>
+              <%= player_collision %>
+            </collision>
+
+            <visual name='player_side_2'>
+              <pose>0 0 <%= -sidePosY %> <%= -Math::PI/2.0 %> 0 0</pose>
+              <geometry>
+                <mesh>
+                  <uri>model://foosball/meshes/player.dae</uri>
+                </mesh>
+              </geometry>
+              <material>
+                <script><name>Gazebo/<%= color %></name></script>
+              </material>
+            </visual>
+
+            <collision name='player_side_2'>
+              <pose>0 -0.005 <%= -sidePosY %> 0 0 0</pose>
+              <%= player_collision %>
+            </collision>
+
+          <% end %>
+          <!-- /side players -->
+
+        </link>
+        <!-- /shaft -->
+
+        <!-- prismatic joint -->
+        <%= '<joint name=' + '"trans' + t + j + '" type="prismatic">' %>
+          <pose> 0 0 0 0 <%= handleAngle %> 0</pose>
+          <parent>world</parent>
+          <%= '<child>shaft' + t + j + '_bridge</child>' %>
+          <axis>
+            <xyz>0 0 1</xyz>
+            <limit>
+              <lower><%= -limitY %></lower>
+              <upper><%= limitY %></upper>
+            </limit>
+          </axis>
+        </joint>
+        <!-- /prismatic joint -->
+
+        <!-- /revolute joint -->
+        <%= '<joint name=' + '"rot' + t + j + '" type="revolute">' %>
+          <pose> 0 0 0 0 <%= handleAngle %> 0</pose>
+          <%= '<parent>shaft' + t + j + '_bridge</parent>' %>
+          <%= '<child>shaft' + t + j + '</child>' %>
+          <axis>
+            <xyz>0 0 1</xyz>
+            <limit>
+              <lower>-1000</lower>
+              <upper>1000</upper>
+            </limit>
+          </axis>
+        </joint>
+        <!-- /revolute joint -->
+
+      <% end %>
+      <!-- /shafts -->
+
+    <% end %>
+    <!-- /teams -->
+
+  </model>
+</sdf>

@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="Foosball ball">
+    <static>false</static>
+    <link name="ball">
+      <!-- Tornado ball. http://www.kickerkult.de/Tornado-ball-new -->
+      <inertial>
+        <mass>0.027</mass>
+        <!-- inertia based on solid sphere 2/5 mr^2 -->
+        <inertia>
+          <ixx>3.1212e-6</ixx>
+          <iyy>3.1212e-6</iyy>
+          <izz>3.1212e-6</izz>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <velocity_decay>
+        <linear>0.0002</linear>
+        <angular>0.0003</angular>
+      </velocity_decay>
+      <collision name="collision">
+        <geometry>
+          <sphere>
+            <radius>0.017</radius>
+          </sphere>
+        </geometry>
+        <surface>
+          <bounce>
+            <restitution_coefficient>0.9</restitution_coefficient>
+            <threshold>0</threshold>
+          </bounce>
+          <contact>
+            <ode>
+              <min_depth>0.001000</min_depth>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <mu>0.60000</mu>
+              <mu2>0.60000</mu2>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <sphere>
+            <radius>0.017</radius>
+          </sphere>
+        </geometry>
+        <material>
+          <script>
+            <uri>file://media/materials/scripts/gazebo.material</uri>
+            <name>Gazebo/White</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>
