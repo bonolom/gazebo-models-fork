@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<sdf version="1.6">
+  <model name="piston_rod_part">
+    <link name="link">
+      <inertial>
+        <pose>0 0.05415 0.00355 0 0 0</pose>
+        <mass>0.5</mass>
+        <inertia>
+          <ixx>0.01741208468</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.00238386708</iyy>
+          <iyz>0</iyz>
+          <izz>0.01972873843</izz>
+        </inertia>
+      </inertial>
+
+      <collision name='collision_1'>
+        <pose frame=''>0 0 0.00375 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.059 0.052 0.0075</size>
+          </box>
+        </geometry>
+      </collision>
+      <collision name='collision_2'>
+        <pose frame=''>0 0.08 0.00375 0 -0 0</pose>
+        <geometry>
+          <box>
+            <size>0.031 0.11 0.0075</size>
+          </box>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+         <geometry>
+           <mesh>
+             <uri>model://piston_rod_part/meshes/piston_rod.dae</uri>
+             <scale>0.25 0.25 0.25</scale>
+           </mesh>
+         </geometry>
+        <material>
+          <script>
+            <uri>model://arm_part/materials/scripts</uri>
+            <uri>model://arm_part/materials/textures</uri>
+            <name>ArmPart/Diffuse</name>
+          </script>
+        </material>
+       </visual>
+    </link>
+  </model>
+</sdf>
